@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能去水印工具</title>
+    <!-- 引入Google字体 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- 引入Bootstrap -->
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.2.3/css/bootstrap.min.css" rel="stylesheet">
+    <!-- 引入FontAwesome图标 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --accent-color: #4cc9f0;
+            --text-color: #212529;
+            --light-bg: #f8f9fa;
+            --border-radius: 12px;
+            --box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--text-color);
+            background: #f4f7fa;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        
+        .card {
+            border: none;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            background: white;
+        }
+        
+        .page-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 3rem 0;
+            margin-bottom: 2rem;
+            border-radius: 0 0 var(--border-radius) var(--border-radius);
+            text-align: center;
+        }
+        
+        .upload-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .upload-box {
+            border: 2px dashed #ccc;
+            border-radius: var(--border-radius);
+            padding: 3rem 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            background-color: white;
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .upload-box:hover {
+            border-color: var(--primary-color);
+            background-color: rgba(67, 97, 238, 0.05);
+        }
+        
+        .upload-box-active {
+            border-color: var(--primary-color);
+            background-color: rgba(67, 97, 238, 0.05);
+        }
+        
+        .preview-container {
+            margin-top: 2rem;
+            text-align: center;
+        }
+        
+        #preview {
+            max-width: 100%;
+            max-height: 500px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            display: none;
+        }
+        
+        .btn-primary {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            border-radius: 8px;
+            padding: 0.6rem 1.5rem;
+            font-weight: 500;
+            box-shadow: 0 4px 14px rgba(67, 97, 238, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background: var(--secondary-color);
+            border-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+        
+        .btn-success {
+            background: #10b981;
+            border-color: #10b981;
+            border-radius: 8px;
+            padding: 0.6rem 1.5rem;
+            font-weight: 500;
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-success:hover {
+            background: #059669;
+            border-color: #059669;
+            transform: translateY(-2px);
+        }
+        
+        .file-input-label {
+            background: #e9ecef;
+            border-radius: 8px;
+            padding: 0.6rem 1.5rem;
+            cursor: pointer;
+            margin-right: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .file-input-label:hover {
+            background: #dee2e6;
+        }
+        
+        .loading-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin: 1rem auto;
+        }
+        
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(67, 97, 238, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary-color);
+            animation: spin 1s infinite linear;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 4rem;
+            padding: 2rem 0;
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+        
+        .features {
+            display: flex;
+            justify-content: space-around;
+            margin: 3rem auto;
+            max-width: 900px;
+        }
+        
+        .feature-item {
+            text-align: center;
+            max-width: 250px;
+        }
+        
+        .feature-icon {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+        
+        .file-name {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+        
+        .drag-text {
+            margin: 1rem 0;
+        }
+        
+        .hidden-input {
+            display: none;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 768px) {
+            .upload-container {
+                padding: 1rem;
+            }
+            
+            .features {
+                flex-direction: column;
+                align-items: center;
+                gap: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 页面头部 -->
+    <div class="page-header">
+        <div class="container">
+            <h1 class="fw-bold">智能去水印工具</h1>
+            <p class="lead">快速、高效、智能地去除图片中的水印，让您的图片更加专业</p>
+        </div>
+    </div>
+    
+    <div class="container">
+        <!-- 主要内容 -->
+        <div class="upload-container card">
+            <!-- 上传区域 -->
+            <div id="uploadBox" class="upload-box">
+                <i class="fas fa-cloud-upload-alt feature-icon"></i>
+                <div class="drag-text">
+                    <h4>拖放文件到这里或点击上传</h4>
+                    <p class="text-muted">支持JPG、JPEG、PNG格式，最大5MB</p>
+                </div>
+                <form id="uploadForm" enctype="multipart/form-data">
+                    <label for="imageInput" class="file-input-label">
+                        <i class="fas fa-file-image"></i> 选择图片
+                    </label>
+                    <input type="file" 
+                           id="imageInput"
+                           class="hidden-input"
+                           accept=".jpg, .jpeg, .png"
+                           required>
+                    <button type="submit" 
+                            class="btn btn-primary"
+                            id="processBtn">
+                        <i class="fas fa-magic"></i> 开始处理
+                    </button>
+                </form>
+                <div id="fileName" class="file-name"></div>
+            </div>
+            
+            <!-- 加载提示 -->
+            <div id="loading" class="loading-container" style="display:none;">
+                <div class="spinner"></div>
+                <span>正在处理图片，请稍候...</span>
+            </div>
+            
+            <!-- 错误提示 -->
+            <div id="errorAlert" class="alert alert-danger mt-3" style="display:none;"></div>
+            
+            <!-- 预览结果 -->
+            <div id="resultArea" class="preview-container" style="display:none;">
+                <h4 class="mb-3">处理结果</h4>
+                <img id="preview" alt="处理结果">
+                <div class="mt-4">
+                    <a id="downloadBtn" 
+                       class="btn btn-success"
+                       download="processed_image.png">
+                       <i class="fas fa-download"></i> 下载处理结果
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 功能特点 -->
+        <div class="features">
+            <div class="feature-item">
+                <i class="fas fa-bolt feature-icon"></i>
+                <h4>快速处理</h4>
+                <p class="text-muted">先进的AI技术，秒级完成水印去除</p>
+            </div>
+            <div class="feature-item">
+                <i class="fas fa-shield-alt feature-icon"></i>
+                <h4>安全可靠</h4>
+                <p class="text-muted">所有图片处理后立即删除，保障您的隐私</p>
+            </div>
+            <div class="feature-item">
+                <i class="fas fa-check-circle feature-icon"></i>
+                <h4>高质量输出</h4>
+                <p class="text-muted">智能算法保证图片去水印后仍然清晰完整</p>
+            </div>
+        </div>
+    </div>
+    
+    <footer class="footer">
+        <div class="container">
+            <p>© 2023 智能去水印工具 · 保护您的图片隐私</p>
+        </div>
+    </footer>
+
+    <!-- 引入Bootstrap JS -->
+    <script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.2.3/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- 自定义JS -->
+    <script>
+        const imageInput = document.getElementById('imageInput');
+        const fileName = document.getElementById('fileName');
+        const uploadBox = document.getElementById('uploadBox');
+        const uploadForm = document.getElementById('uploadForm');
+        const errorAlert = document.getElementById('errorAlert');
+        const loading = document.getElementById('loading');
+        const resultArea = document.getElementById('resultArea');
+        const preview = document.getElementById('preview');
+        const downloadBtn = document.getElementById('downloadBtn');
+        
+        // 显示选择的文件名
+        imageInput.addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                fileName.textContent = this.files[0].name;
+                uploadBox.classList.add('upload-box-active');
+                // 隐藏之前可能显示的错误消息
+                errorAlert.style.display = 'none';
+            }
+        });
+        
+        // 拖放功能
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            uploadBox.addEventListener(eventName, preventDefaults, false);
+        });
+        
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        
+        ['dragenter', 'dragover'].forEach(eventName => {
+            uploadBox.addEventListener(eventName, highlight, false);
+        });
+        
+        ['dragleave', 'drop'].forEach(eventName => {
+            uploadBox.addEventListener(eventName, unhighlight, false);
+        });
+        
+        function highlight() {
+            uploadBox.classList.add('upload-box-active');
+        }
+        
+        function unhighlight() {
+            uploadBox.classList.remove('upload-box-active');
+        }
+        
+        uploadBox.addEventListener('drop', handleDrop, false);
+        
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            
+            if (files && files.length) {
+                imageInput.files = files;
+                fileName.textContent = files[0].name;
+                // 隐藏之前可能显示的错误消息
+                errorAlert.style.display = 'none';
+            }
+        }
+        
+        // 表单提交处理
+        uploadForm.onsubmit = async (e) => {
+            e.preventDefault();
+            
+            if (!imageInput.files || !imageInput.files[0]) {
+                errorAlert.textContent = '请选择一个图片文件';
+                errorAlert.style.display = 'block';
+                return;
+            }
+            
+            // 验证文件大小
+            const fileSize = imageInput.files[0].size;
+            const maxSize = 5 * 1024 * 1024; // 5MB
+            if (fileSize > maxSize) {
+                errorAlert.textContent = '文件大小超过5MB限制';
+                errorAlert.style.display = 'block';
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('image', imageInput.files[0]);
+
+            // 显示加载动画
+            loading.style.display = 'flex';
+            errorAlert.style.display = 'none';
+            resultArea.style.display = 'none';
+
+            try {
+                const response = await fetch('/process', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || '处理失败');
+                }
+                
+                // 确保预览图片已加载后再显示
+                preview.onload = function() {
+                    resultArea.style.display = 'block';
+                    preview.style.display = 'block';
+                    
+                    // 滚动到结果区域
+                    resultArea.scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                };
+                
+                // 处理URL：将下载链接和预览链接分开
+                // 从完整URL中获取文件名
+                const urlParts = data.image_url.split('/');
+                const filename = urlParts[urlParts.length - 1];
+                
+                // 设置预览图片源（使用preview路由）
+                preview.src = `/preview/${filename}`;
+                
+                // 设置下载链接（使用下载路由）
+                downloadBtn.href = data.image_url;
+                
+                // 如果图片已经缓存，可能不会触发onload事件，所以添加此检查
+                if (preview.complete) {
+                    resultArea.style.display = 'block';
+                    preview.style.display = 'block';
+                    
+                    // 滚动到结果区域
+                    resultArea.scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                }
+                
+            } catch (error) {
+                console.error('处理错误:', error);
+                errorAlert.textContent = error.message || '处理失败，请重试';
+                errorAlert.style.display = 'block';
+                
+                // 滚动到错误信息区域
+                errorAlert.scrollIntoView({
+                    behavior: 'smooth'
+                });
+            } finally {
+                loading.style.display = 'none';
+            }
+        };
+        
+        // 确保下载按钮在点击时能正确触发下载
+        downloadBtn.addEventListener('click', function(e) {
+            // 先检查链接是否有效
+            if (!this.href || this.href === '#' || this.href === window.location.href) {
+                e.preventDefault();
+                errorAlert.textContent = '下载链接无效，请重新处理图片';
+                errorAlert.style.display = 'block';
+                return;
+            }
+            
+            // 添加可选的下载确认或跟踪
+            console.log('下载文件:', this.href);
+        });
+    </script>
+</body>
+</html>
